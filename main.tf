@@ -28,7 +28,7 @@ resource "aws_instance" "managed_nodes" {
   ami = "ami-016eb5d644c333ccb"
   count = 3
   instance_type = "t2.micro"
-  key_name = "mykey"  # change with your pem file
+  key_name = "mykey" 
   vpc_security_group_ids = [aws_security_group.tf-sec-gr.id]
   iam_instance_profile = "jenkins-project-profile-${var.user}" # this profile is created for jenkins server in jenkins tf file. normally there is only need for access to ECR for these 3 managed_nodes
   tags = {

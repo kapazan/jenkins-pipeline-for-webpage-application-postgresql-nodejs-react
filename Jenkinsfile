@@ -99,7 +99,7 @@ pipeline{
                 echo "Deploy the App"
                 sh "ls -l"
                 sh "ansible --version"
-                sh "ansible-inventory --graph" |
+                sh "ansible-inventory --graph" 
                 ansiblePlaybook credentialsId: 'mykey', disableHostKeyChecking:true, installation: 'ansible', inventory: 'inventory_aws_ec2.yml', playbook: 'docker_project.yml'
             }
         }   
