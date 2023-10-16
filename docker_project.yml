@@ -25,7 +25,7 @@
 
     - name: install 'yum-utils' package
       ansible.builtin.yum:
-        name: {{ item }}
+        name: "{{ item }}"
         state: latest
       with_items: 
         - yum-utils
