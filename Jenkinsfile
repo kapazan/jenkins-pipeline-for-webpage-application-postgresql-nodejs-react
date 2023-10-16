@@ -13,12 +13,25 @@ pipeline{
         ECR_REGISTRY="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
         APP_REPO_NAME = "rizgar-repo/todo-app"
         APP_NAME = "todo"
+        ANS_KEYPAIR="${APP_NAME}.key"
 }
 
+
     stages{
+
+        stage('Create Key Pair for Ansible') {
+            steps {
+                echo "Creating Key Pair for ${APP_NAME} App"
+                sh "aws ec2 create-key-pair --region ${AWS_REGION} --key-name ${ANS_KEYPAIR} --query KeyMaterial --output text > ${ANS_KEYPAIR}"
+                sh "chmod 400 ${ANS_KEYPAIR}"
+            }
+        }
+
+
         stage('Create Infrastructure for the App') {
             steps {
                 echo "Creating Infastructure for the App on AWS Cloud"
+                sh 'sed -i "s/mykey/$ANS_KEYPAIR/g" main.tf'
                 sh "terraform init"
                 sh "terraform apply --auto-approve"
             }
@@ -100,7 +113,7 @@ pipeline{
                 sh "ls -l"
                 sh "ansible --version"
                 sh "ansible-inventory --graph" 
-                ansiblePlaybook credentialsId: 'mykey', disableHostKeyChecking: true, installation: 'ansible', inventory: 'inventory_aws_ec2.yml', playbook: 'docker_project.yml'
+                ansiblePlaybook credentialsId: '${ANS_KEYPAIR}', disableHostKeyChecking: true, installation: 'ansible', inventory: 'inventory_aws_ec2.yml', playbook: 'docker_project.yml'
             }
         }   
 
