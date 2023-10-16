@@ -84,7 +84,7 @@
   become: true
   vars:
     container_name: recep_postgre
-    image_name: 359414664399.dkr.ecr.us-east-1.amazonaws.com/clarusway-repo/cw-todo-app:postgre
+    image_name: 359414664399.dkr.ecr.us-east-1.amazonaws.com/rizgar/todo-app:postgre
   tasks:
     - name: remove postgre container
       community.docker.docker_container:
@@ -114,7 +114,7 @@
   become: true
   vars:
     container_name: recep_nodejs
-    image_name: 359414664399.dkr.ecr.us-east-1.amazonaws.com/clarusway-repo/cw-todo-app:nodejs
+    image_name: 359414664399.dkr.ecr.us-east-1.amazonaws.com/rizgar/todo-app:nodejs
   tasks:
     - name: remove nodejs container
       community.docker.docker_container:
@@ -140,7 +140,7 @@
   become: true
   vars:
     container_name: recep_react
-    image_name: 359414664399.dkr.ecr.us-east-1.amazonaws.com/clarusway-repo/cw-todo-app:react
+    image_name: 359414664399.dkr.ecr.us-east-1.amazonaws.com/rizgar/todo-app:react
   tasks:
     - name: remove react container
       community.docker.docker_container:
