@@ -1,16 +1,17 @@
-- name: install docker, awscli and login ecr 
+- name: install docker and config
   hosts: _development
   become: true
   vars:
     aws_region: us-east-1
-    ecr_registry: 359414664399.dkr.ecr.us-east-1.amazonaws.com
-  tasks: 
+    ecr_registry: 046402772087.dkr.ecr.us-east-1.amazonaws.com
+  tasks:
     - name: update all packages
       ansible.builtin.yum:
-        name: "*"
+        name: '*'
         state: latest
-    
-    - name: remove old docker packages
+
+    # we may need to uninstall any existing docker files from the centos repo first.
+    - name: Remove docker if installed from CentOS repo
       ansible.builtin.yum:
         name:
           - docker
@@ -23,33 +24,33 @@
           - docker-engine
         state: removed
 
-    - name: install 'yum-utils' package
+    - name: Install yum utils
       ansible.builtin.yum:
         name: "{{ item }}"
         state: latest
-      with_items: 
+      with_items:
         - yum-utils
         - device-mapper-persistent-data
         - lvm2
         - unzip
 
-    - name: add docker repo
+    - name: Add Docker repo
       ansible.builtin.get_url:
         url: https://download.docker.com/linux/centos/docker-ce.repo
-        dest:  /etc/yum.repos.d/docker-ce.repo
-    
-    - name: install docker
+        dest: /etc/yum.repos.d/docker-ce.repo
+
+    - name: Install Docker
       ansible.builtin.package:
         name: docker-ce
         state: latest
 
-    - name: add user ec2-user to docker group
+    - name: Add user ec2-user to docker group
       ansible.builtin.user:
         name: ec2-user
         groups: docker
         append: yes
 
-    - name: start docker service
+    - name: Start Docker service
       ansible.builtin.service:
         name: docker
         state: started
@@ -59,111 +60,103 @@
       ansible.builtin.get_url:
         url: https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
         dest: /home/ec2-user/awscliv2.zip
-    
+
     - name: unzip zip file
       ansible.builtin.unarchive:
         src: /home/ec2-user/awscliv2.zip
         dest: /home/ec2-user
-        remove_src: true
-    
-    - name: run the aws cli installer
+        remote_src: True
+
+    - name: run the installer
       ansible.builtin.command:
       args:
         cmd: "./aws/install"
         creates: /usr/local/bin/aws
 
-    - name: login to AWS ec2-user
-      ansible.builtin.shell:
+    - name: log in to AWS ec2-user
+      ansible.builtin.shell: |
         export PATH=/usr/local/bin:$PATH
         source ~/.bash_profile
         aws ecr get-login-password --region {{ aws_region }} | docker login --username AWS --password-stdin {{ ecr_registry }}
 
-
-
-- name: configure postgre node
+- name: postgre database config
   hosts: _ansible_postgresql
   become: true
   vars:
-    container_name: rizgar_postgre
-    image_name: 359414664399.dkr.ecr.us-east-1.amazonaws.com/rizgar-repo/todo-app:postgre
-  tasks:  
-    - name: kill running {{ container_name }} container
+    container_name: recep_postgre
+    image_name: 046402772087.dkr.ecr.us-east-1.amazonaws.com/clarusway-repo/cw-todo-app:postgre
+  tasks:
+    - name: remove postgre container
       community.docker.docker_container:
         name: "{{ container_name }}"
         state: absent
         force_kill: true
-    
-    - name: remove {{ image_name }} image
+
+    - name: remove postgre image
       community.docker.docker_image:
         name: "{{ image_name }}"
         state: absent
-      
-    - name: run postgresql docker container
+
+    - name: Launch postgresql docker container
       community.docker.docker_container:
         name: "{{ container_name }}"
         image: "{{ image_name }}"
         state: started
-        ports: 
+        ports:
           - "5432:5432"
         env:
           POSTGRES_PASSWORD: "Pp123456789"
-        volumes: 
+        volumes:
           - /db-data:/var/lib/postgresql/data
-      register: container_info
 
-
-
-
-- name: configure nodejs node
+- name: Nodejs Server configuration
   hosts: _ansible_nodejs
   become: true
   vars:
-    container_name: rizgar_nodejs
-    image_name: 359414664399.dkr.ecr.us-east-1.amazonaws.com/rizgar-repo/todo-app:nodejs
+    container_name: recep_nodejs
+    image_name: 046402772087.dkr.ecr.us-east-1.amazonaws.com/clarusway-repo/cw-todo-app:nodejs
   tasks:
-    - name: kill {{ container_name }} container
+    - name: remove nodejs container
       community.docker.docker_container:
         name: "{{ container_name }}"
         state: absent
         force_kill: true
 
-    - name: delete {{ image_name }} image
+    - name: remove nodejs image
       community.docker.docker_image:
         name: "{{ image_name }}"
         state: absent
 
-    - name: run docker container
+    - name: Launch nodejs docker container
       community.docker.docker_container:
         name: "{{ container_name }}"
         image: "{{ image_name }}"
-        ports: 
-          - "5000:5000"
         state: started
+        ports:
+          - "5000:5000"
 
-
-
-- name: react UI server configuration
+- name: React UI Server configuration
   hosts: _ansible_react
   become: true
-  vars: 
-    container_name: rizgar_react
-    image_name: 359414664399.dkr.ecr.us-east-1.amazonaws.com/rizgar-repo/todo-app:react
-  tasks: 
-    - name: kill running {{ container_name }} container
+  vars:
+    container_name: recep_react
+    image_name: 046402772087.dkr.ecr.us-east-1.amazonaws.com/clarusway-repo/cw-todo-app:react
+  tasks:
+    - name: remove react container
       community.docker.docker_container:
         name: "{{ container_name }}"
         state: absent
         force_kill: true
 
-    - name: delete {{ image_name }} image
+    - name: remove react image
       community.docker.docker_image:
         name: "{{ image_name }}"
         state: absent
 
-    - name: run the container
+    - name: Launch react docker container
       community.docker.docker_container:
         name: "{{ container_name }}"
         image: "{{ image_name }}"
+        state: started
         ports:
           - "3000:3000"
-        state: started
