@@ -30,7 +30,6 @@
         state: latest
       with_items:
         - yum-utils
-        - lvm2
         - unzip
 
     - name: Add Docker repo
