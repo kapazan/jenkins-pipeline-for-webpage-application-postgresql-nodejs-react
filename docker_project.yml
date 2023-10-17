@@ -83,8 +83,8 @@
   hosts: _ansible_postgresql
   become: true
   vars:
-    container_name: recep_postgre
-    image_name: 359414664399.dkr.ecr.us-east-1.amazonaws.com/rizgar/todo-app:postgre
+    container_name: rizgar_postgre
+    image_name: 359414664399.dkr.ecr.us-east-1.amazonaws.com/rizgar-repo/todo-app:postgre
   tasks:
     - name: remove postgre container
       community.docker.docker_container:
@@ -113,8 +113,8 @@
   hosts: _ansible_nodejs
   become: true
   vars:
-    container_name: recep_nodejs
-    image_name: 359414664399.dkr.ecr.us-east-1.amazonaws.com/rizgar/todo-app:nodejs
+    container_name: rizgar_nodejs
+    image_name: 359414664399.dkr.ecr.us-east-1.amazonaws.com/rizgar-repo/todo-app:nodejs
   tasks:
     - name: remove nodejs container
       community.docker.docker_container:
@@ -139,8 +139,8 @@
   hosts: _ansible_react
   become: true
   vars:
-    container_name: recep_react
-    image_name: 359414664399.dkr.ecr.us-east-1.amazonaws.com/rizgar/todo-app:react
+    container_name: rizgar_react
+    image_name: 359414664399.dkr.ecr.us-east-1.amazonaws.com/rizgar-repo/todo-app:react
   tasks:
     - name: remove react container
       community.docker.docker_container:
